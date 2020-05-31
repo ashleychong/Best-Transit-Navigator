@@ -12,6 +12,7 @@ negative_freq = []
 wordAll = []
 freqAll = []
 
+neutralword_totalfreq = []
 posword_freq = {}
 posword_totalfreq = []
 negword_freq = {}
@@ -218,7 +219,7 @@ def plotStopwords():
         col = i % cols
         fig.add_trace(traces[i], row=row+1, col=col+1)
 
-    fig.update_layout(title_text="Number of stopwords per entry")
+    fig.update_layout(title_text="Number of stopwords in every article")
     fig.show()
 
 
@@ -239,7 +240,7 @@ def plotPositiveWords():
         col = i % cols
         fig.add_trace(traces[i], row=row+1, col=col+1)
 
-    fig.update_layout(title_text="Number of positive words per entry")
+    fig.update_layout(title_text="Number of positive words in every article")
     fig.show()
 
 
@@ -260,19 +261,20 @@ def plotNegativeWords():
         col = i % cols
         fig.add_trace(traces[i], row=row+1, col=col+1)
 
-    fig.update_layout(title_text="Number of negative words per entry")
+    fig.update_layout(title_text="Number of negative words in every article")
     fig.show()
 
 
 def plotPositiveWordsAgainstNegativeWords():
-    trace0 = go.Bar(y=transport, x=posword_totalfreq,
-                    name='Positive words', orientation='h')
-    trace1 = go.Bar(y=transport, x=negword_totalfreq,
-                    name='Negative words', orientation='h')
+    trace0 = go.Bar(x=transport, y=posword_totalfreq,
+                    name='Positive words')
+    trace1 = go.Bar(x=transport, y=negword_totalfreq,
+                    name='Negative words')
     fig = go.Figure()
     fig.add_trace(trace0)
     fig.add_trace(trace1)
-    fig.update_layout(barmode='stack')
+    fig.update_layout(
+        barmode='group', title_text="Comparison between the number of positive words and negative words in every article")
     fig.show()
 
 
