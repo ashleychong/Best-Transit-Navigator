@@ -1,8 +1,11 @@
 import copy
+import math
 import urllib.request
 import json
 from bs4 import BeautifulSoup
 from bs4.element import Comment
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 positive_freq = []
 negative_freq = []
@@ -13,11 +16,12 @@ probability = {}
 
 stopword_file = open("assets/stopwords.txt", "r")
 nltk_stopwords = stopword_file.read().lower().split("\n")
-print(nltk_stopwords)
-transport = ["bus", "flight", "taxi"]
+# print(nltk_stopwords)
+transport = ["bus", "flight", "taxi", "ktm"]
 urls = ["https://www.malaysiakini.com/news/502024",
         "https://www.channelnewsasia.com/news/asia/malaysia-airlines-auckland-aborted-takeoff-mh145-new-zealand-12241318",
-        "https://www.malaymail.com/news/malaysia/2019/12/13/taxi-drivers-must-transform-and-adopt-latest-technology-says-loke/1818997"]
+        "https://www.malaymail.com/news/malaysia/2019/12/13/taxi-drivers-must-transform-and-adopt-latest-technology-says-loke/1818997",
+        "https://themalaysianreserve.com/2020/02/03/to-awaken-the-sleeping-and-sluggish-giant"]
 
 
 class AppURLopener(urllib.request.FancyURLopener):
@@ -93,9 +97,13 @@ def countStopWord(words, i, txt):
             # print(freq)
             stopwordFreq.append(freq)
     stopWordList[i] = copy.deepcopy(stopwordFreq)
-    temp['wordFreq'] = stopwordFreq
     temp['wordList'] = stopwords
+    temp['wordFreq'] = stopwordFreq
     stopWordList[i] = copy.deepcopy(temp)
+
+
+def removeStopwords(words):
+    return [word for word in words if word not in nltk_stopwords]
 
 
 def rabinKarp(pat, txt):
@@ -149,22 +157,52 @@ def rabinKarp(pat, txt):
     return freq
 
 
+def plotStopwords():
+    traces = []
+    for i in range(len(transport)):
+        x = stopWordList[i]['wordList']
+        y = stopWordList[i]['wordFreq']
+        traces.append(go.Bar(x=x, y=y, name=transport[i]))
+
+    cols = 2
+    rows = math.ceil(len(transport)/cols)
+
+    fig = make_subplots(rows=rows, cols=cols, vertical_spacing=0.5/rows)
+
+    for i in range(len(traces)):
+        row = i//cols
+        col = i % cols
+        fig.add_trace(traces[i], row=row+1, col=col+1)
+
+    fig.update_layout(title_text="Number of stopwords per entry")
+    fig.show()
+
+
 for i in range(len(urls)):
     txt, wordlist, wordfreq = extract_text(urls[i])
     countStopWord(wordlist, i, txt)
-    print(stopWordList[i]['wordList'])
-    print()
-    print(stopWordList[i]['wordFreq'])
+
+    print(
+        str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
     print()
     print()
     countStopWordList(wordlist, i, txt)
-    print(stopWordListx[i]['wordList'])
-    print()
-    print(stopWordListx[i]['wordFreq'])
-    print('----------------------------------------------------------------------------------------------------------')
+    print(
+        str(list(zip(stopWordListx[i]['wordList'], stopWordListx[i]['wordFreq']))))
+    print('--------------------------------------------------------------------------------------------------------------------')
+
+    wordlist = removeStopwords(wordlist)
 
     try:
         with open('assets/stopwordFreq{}.txt'.format(str(i)), 'w', encoding='utf-8')as outfile:
             json.dump(stopWordList[i], outfile, ensure_ascii=False)
     except Exception as e:
         print(e)
+    try:
+        with open('assets/news-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
+            outfile.write(txt)
+    except Exception as e:
+        print(e)
+
+# outside for loop
+plotStopwords()
