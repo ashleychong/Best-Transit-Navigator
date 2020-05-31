@@ -1,1 +1,1 @@
-{"wordList": ["renew", "community", "special", "time", "many", "able", "play", "collected", "agree", "communication", "create", "please", "confident", "victory", "leader", "new", "service", "privacy", "support"], "wordFreq": [1, 1, 4, 11, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 9, 1, 1, 1]}
+{"wordList": ["renew", "community", "special", "time", "many", "able", "play", "collected", "agree", "communication", "create", "please", "new", "service", "privacy", "support"], "wordFreq": [1, 1, 4, 11, 1, 2, 1, 2, 1, 1, 1, 1, 9, 1, 1, 1]}

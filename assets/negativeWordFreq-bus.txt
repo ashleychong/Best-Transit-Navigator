@@ -1,1 +1,1 @@
-{"wordList": ["irregularity", "rail", "foul", "violate", "needless", "violators", "risk", "offending", "unpleasant", "unnecessary"], "wordFreq": [1, 1, 1, 1, 1, 2, 1, 1, 2, 1]}
+{"wordList": ["irregularity", "rail", "foul", "violate", "needless", "violators", "risk", "offending", "unpleasant", "unnecessary", "split"], "wordFreq": [1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1]}

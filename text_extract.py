@@ -13,7 +13,9 @@ wordAll = []
 freqAll = []
 
 posword_freq = {}
+posword_totalfreq = []
 negword_freq = {}
+negword_totalfreq = []
 stopWordList = {}
 probability = {}
 
@@ -25,12 +27,12 @@ allpositivewords = positive_file.read().lower().split(",  ")
 # print(allpositivewords)
 negative_file = open("assets/allnegativewords.txt", "r", encoding="UTF8")
 allnegativewords = negative_file.read().lower().split(",    ")
-print(allnegativewords)
+# print(allnegativewords)
 
-transport = ["bus", "flight", "taxi", "ktm"]
+transport = ["Bus", "Flight", "Taxi", "KTM"]
 urls = ["https://www.malaysiakini.com/news/502024",
         "https://www.channelnewsasia.com/news/asia/malaysia-airlines-auckland-aborted-takeoff-mh145-new-zealand-12241318",
-        "https://www.malaymail.com/news/malaysia/2019/12/13/taxi-drivers-must-transform-and-adopt-latest-technology-says-loke/1818997",
+        "https://www.thestar.com.my/news/nation/2018/10/28/taken-for-a-ride-by-taxi-drivers",
         "https://themalaysianreserve.com/2020/02/03/to-awaken-the-sleeping-and-sluggish-giant"]
 
 
@@ -118,28 +120,34 @@ def countPositiveWords(words, i, txt):
     posWordFreq = []
     posWords = []
     temp = {}
+    count = 0
     for word in words:
         if word in allpositivewords and word not in posWords:
             posWords.append(word)
             freq = rabinKarp(word, txt)
             posWordFreq.append(freq)
+            count += freq
     temp['wordList'] = posWords
     temp['wordFreq'] = posWordFreq
     posword_freq[i] = copy.deepcopy(temp)
+    posword_totalfreq.append(count)
 
 
 def countNegativeWords(words, i, txt):
     negWordFreq = []
     negWords = []
     temp = {}
+    count = 0
     for word in words:
         if word in allnegativewords and word not in negWords:
             negWords.append(word)
             freq = rabinKarp(word, txt)
             negWordFreq.append(freq)
+            count += freq
     temp['wordList'] = negWords
     temp['wordFreq'] = negWordFreq
     negword_freq[i] = copy.deepcopy(temp)
+    negword_totalfreq.append(count)
 
 
 def rabinKarp(pat, txt):
@@ -196,9 +204,9 @@ def rabinKarp(pat, txt):
 def plotStopwords():
     traces = []
     for i in range(len(transport)):
-        x = stopWordList[i]['wordList']
-        y = stopWordList[i]['wordFreq']
-        traces.append(go.Bar(x=x, y=y, name=transport[i]))
+        x = stopWordList[i]['wordFreq']
+        y = stopWordList[i]['wordList']
+        traces.append(go.Bar(x=x, y=y, name=transport[i], orientation='h'))
 
     cols = 2
     rows = math.ceil(len(transport)/cols)
@@ -211,6 +219,60 @@ def plotStopwords():
         fig.add_trace(traces[i], row=row+1, col=col+1)
 
     fig.update_layout(title_text="Number of stopwords per entry")
+    fig.show()
+
+
+def plotPositiveWords():
+    traces = []
+    for i in range(len(transport)):
+        x = posword_freq[i]['wordFreq']
+        y = posword_freq[i]['wordList']
+        traces.append(go.Bar(x=x, y=y, name=transport[i], orientation='h'))
+
+    cols = 2
+    rows = math.ceil(len(transport)/cols)
+
+    fig = make_subplots(rows=rows, cols=cols, vertical_spacing=0.5/rows)
+
+    for i in range(len(traces)):
+        row = i//cols
+        col = i % cols
+        fig.add_trace(traces[i], row=row+1, col=col+1)
+
+    fig.update_layout(title_text="Number of positive words per entry")
+    fig.show()
+
+
+def plotNegativeWords():
+    traces = []
+    for i in range(len(transport)):
+        x = negword_freq[i]['wordFreq']
+        y = negword_freq[i]['wordList']
+        traces.append(go.Bar(x=x, y=y, name=transport[i], orientation='h'))
+
+    cols = 2
+    rows = math.ceil(len(transport)/cols)
+
+    fig = make_subplots(rows=rows, cols=cols, vertical_spacing=0.5/rows)
+
+    for i in range(len(traces)):
+        row = i//cols
+        col = i % cols
+        fig.add_trace(traces[i], row=row+1, col=col+1)
+
+    fig.update_layout(title_text="Number of negative words per entry")
+    fig.show()
+
+
+def plotPositiveWordsAgainstNegativeWords():
+    trace0 = go.Bar(y=transport, x=posword_totalfreq,
+                    name='Positive words', orientation='h')
+    trace1 = go.Bar(y=transport, x=negword_totalfreq,
+                    name='Negative words', orientation='h')
+    fig = go.Figure()
+    fig.add_trace(trace0)
+    fig.add_trace(trace1)
+    fig.update_layout(barmode='stack')
     fig.show()
 
 
@@ -247,11 +309,24 @@ for i in range(len(urls)):
     except Exception as e:
         print(e)
     try:
+        with open('assets/positiveWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
+            json.dump(posword_totalfreq, outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+    try:
         with open('assets/negativeWordFreq-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
             json.dump(negword_freq[i], outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+    try:
+        with open('assets/negativeWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
+            json.dump(negword_totalfreq, outfile, ensure_ascii=False)
     except Exception as e:
         print(e)
 
 
 # outside for loop
 plotStopwords()
+plotPositiveWords()
+plotNegativeWords()
+plotPositiveWordsAgainstNegativeWords()
