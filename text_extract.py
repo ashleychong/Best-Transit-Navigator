@@ -11,12 +11,22 @@ positive_freq = []
 negative_freq = []
 wordAll = []
 freqAll = []
+
+posword_freq = {}
+negword_freq = {}
 stopWordList = {}
 probability = {}
 
 stopword_file = open("assets/stopwords.txt", "r")
 nltk_stopwords = stopword_file.read().lower().split("\n")
 # print(nltk_stopwords)
+positive_file = open("assets/allpositivewords.txt", "r")
+allpositivewords = positive_file.read().lower().split(",  ")
+# print(allpositivewords)
+negative_file = open("assets/allnegativewords.txt", "r", encoding="UTF8")
+allnegativewords = negative_file.read().lower().split(",    ")
+print(allnegativewords)
+
 transport = ["bus", "flight", "taxi", "ktm"]
 urls = ["https://www.malaysiakini.com/news/502024",
         "https://www.channelnewsasia.com/news/asia/malaysia-airlines-auckland-aborted-takeoff-mh145-new-zealand-12241318",
@@ -80,7 +90,6 @@ def countStopWordList(words, i, txt):
         if word in nltk_stopwords and word not in stopwords:
             stopwords.append(word)
             stopwordFreq.append(words.count(word))
-    stopWordListx[i] = copy.deepcopy(stopwordFreq)
     temp['wordFreq'] = stopwordFreq
     temp['wordList'] = stopwords
     stopWordListx[i] = copy.deepcopy(temp)
@@ -96,7 +105,6 @@ def countStopWord(words, i, txt):
             freq = rabinKarp(word, txt)
             # print(freq)
             stopwordFreq.append(freq)
-    stopWordList[i] = copy.deepcopy(stopwordFreq)
     temp['wordList'] = stopwords
     temp['wordFreq'] = stopwordFreq
     stopWordList[i] = copy.deepcopy(temp)
@@ -104,6 +112,34 @@ def countStopWord(words, i, txt):
 
 def removeStopwords(words):
     return [word for word in words if word not in nltk_stopwords]
+
+
+def countPositiveWords(words, i, txt):
+    posWordFreq = []
+    posWords = []
+    temp = {}
+    for word in words:
+        if word in allpositivewords and word not in posWords:
+            posWords.append(word)
+            freq = rabinKarp(word, txt)
+            posWordFreq.append(freq)
+    temp['wordList'] = posWords
+    temp['wordFreq'] = posWordFreq
+    posword_freq[i] = copy.deepcopy(temp)
+
+
+def countNegativeWords(words, i, txt):
+    negWordFreq = []
+    negWords = []
+    temp = {}
+    for word in words:
+        if word in allnegativewords and word not in negWords:
+            negWords.append(word)
+            freq = rabinKarp(word, txt)
+            negWordFreq.append(freq)
+    temp['wordList'] = negWords
+    temp['wordFreq'] = negWordFreq
+    negword_freq[i] = copy.deepcopy(temp)
 
 
 def rabinKarp(pat, txt):
@@ -182,27 +218,40 @@ for i in range(len(urls)):
     txt, wordlist, wordfreq = extract_text(urls[i])
     countStopWord(wordlist, i, txt)
 
-    print(
-        str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
-    print()
-    print()
-    countStopWordList(wordlist, i, txt)
-    print(
-        str(list(zip(stopWordListx[i]['wordList'], stopWordListx[i]['wordFreq']))))
-    print('--------------------------------------------------------------------------------------------------------------------')
+    # print(
+    #     str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
+    # print()
+    # print()
+    # countStopWordList(wordlist, i, txt)
+    # print(
+    #     str(list(zip(stopWordListx[i]['wordList'], stopWordListx[i]['wordFreq']))))
+    # print('--------------------------------------------------------------------------------------------------------------------')
 
     wordlist = removeStopwords(wordlist)
+    countPositiveWords(wordlist, i, txt)
+    countNegativeWords(wordlist, i, txt)
 
-    try:
-        with open('assets/stopwordFreq{}.txt'.format(str(i)), 'w', encoding='utf-8')as outfile:
-            json.dump(stopWordList[i], outfile, ensure_ascii=False)
-    except Exception as e:
-        print(e)
     try:
         with open('assets/news-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
             outfile.write(txt)
     except Exception as e:
         print(e)
+    try:
+        with open('assets/stopwordFreq-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
+            json.dump(stopWordList[i], outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+    try:
+        with open('assets/positiveWordFreq-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
+            json.dump(posword_freq[i], outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+    try:
+        with open('assets/negativeWordFreq-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
+            json.dump(negword_freq[i], outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
+
 
 # outside for loop
 plotStopwords()

@@ -1,0 +1,1 @@
+{"wordList": ["aborted", "breaking", "abort", "unexpected", "issue", "abrupt", "panic", "attack", "worry", "shock", "regrets", "inconvenience", "invalid"], "wordFreq": [3, 1, 4, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1]}

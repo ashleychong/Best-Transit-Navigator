@@ -1,0 +1,1 @@
+{"wordList": ["impose"], "wordFreq": [1]}
