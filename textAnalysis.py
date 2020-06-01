@@ -1,6 +1,6 @@
 import copy
 import math
-import urllib.request
+import requests
 import json
 from bs4 import BeautifulSoup
 from bs4.element import Comment
@@ -33,13 +33,9 @@ allnegativewords = negative_file.read().split("\n")
 
 transport = ["Bus", "Flight", "Taxi", "KTM"]
 urls = ["https://www.malaysiakini.com/news/502024",
-        "https://www.channelnewsasia.com/news/asia/malaysia-airlines-auckland-aborted-takeoff-mh145-new-zealand-12241318",
+        "https://www.malaysiakini.com/letters/480377",
         "https://www.thestar.com.my/news/nation/2018/10/28/taken-for-a-ride-by-taxi-drivers",
         "https://themalaysianreserve.com/2020/02/03/to-awaken-the-sleeping-and-sluggish-giant"]
-
-
-class AppURLopener(urllib.request.FancyURLopener):
-    version = "Mozilla/5.0"
 
 
 def tag_visible(element):
@@ -58,9 +54,7 @@ def text_from_html(body):
 
 
 def extract_text(url):
-    opener = AppURLopener()
-    response = opener.open(url)
-    html = response.read()
+    html = requests.get(url).text
     rawstring = text_from_html(html)
     wordstring = rawstring.lower()
 
@@ -311,9 +305,9 @@ for i in range(len(urls)):
     txt, wordlist, wordfreq = extract_text(urls[i])
     countStopWord(wordlist, i, txt)
 
-    print(
-        str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
-    print()
+    # print(
+    #     str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
+    # print()
     # print()
     # countStopWordList(wordlist, i, txt)
     # print(

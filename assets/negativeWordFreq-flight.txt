@@ -1,1 +1,1 @@
-{"wordList": ["aborted", "breaking", "abort", "unexpected", "issue", "abrupt", "lurch", "panic", "attack", "worry", "shock", "regrets", "inconvenience", "invalid"], "wordFreq": [3, 1, 4, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1]}
+{"wordList": ["failed", "embarrassment", "failing", "lost", "problem", "poor", "shameful", "upset", "disappointed", "foul", "violate", "needless", "violators", "risk", "offending", "unpleasant", "unnecessary", "threat", "denies", "conflict", "defect"], "wordFreq": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1]}
