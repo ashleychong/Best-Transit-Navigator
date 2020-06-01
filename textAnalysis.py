@@ -11,23 +11,24 @@ positive_freq = []
 negative_freq = []
 wordAll = []
 freqAll = []
+probability = {}
 
-neutralword_totalfreq = []
+otherword_freq = {}
+otherword_totalfreq = []
 posword_freq = {}
 posword_totalfreq = []
 negword_freq = {}
 negword_totalfreq = []
 stopWordList = {}
-probability = {}
 
-stopword_file = open("assets/stopwords.txt", "r")
-nltk_stopwords = stopword_file.read().lower().split("\n")
-# print(nltk_stopwords)
+stopword_file = open("assets/allstopwords.txt", "r")
+allstopwords = stopword_file.read().split("\n")
+# print(allstopwords)
 positive_file = open("assets/allpositivewords.txt", "r")
-allpositivewords = positive_file.read().lower().split(",  ")
+allpositivewords = positive_file.read().split("\n")
 # print(allpositivewords)
 negative_file = open("assets/allnegativewords.txt", "r", encoding="UTF8")
-allnegativewords = negative_file.read().lower().split(",    ")
+allnegativewords = negative_file.read().split("\n")
 # print(allnegativewords)
 
 transport = ["Bus", "Flight", "Taxi", "KTM"]
@@ -57,7 +58,6 @@ def text_from_html(body):
 
 
 def extract_text(url):
-
     opener = AppURLopener()
     response = opener.open(url)
     html = response.read()
@@ -90,7 +90,7 @@ def countStopWordList(words, i, txt):
     stopwords = []
     temp = {}
     for word in words:
-        if word in nltk_stopwords and word not in stopwords:
+        if word in allstopwords and word not in stopwords:
             stopwords.append(word)
             stopwordFreq.append(words.count(word))
     temp['wordFreq'] = stopwordFreq
@@ -103,7 +103,7 @@ def countStopWord(words, i, txt):
     stopwords = []
     temp = {}
     for word in words:
-        if word in nltk_stopwords and word not in stopwords:
+        if word in allstopwords and word not in stopwords:
             stopwords.append(word)
             freq = rabinKarp(word, txt)
             # print(freq)
@@ -114,7 +114,24 @@ def countStopWord(words, i, txt):
 
 
 def removeStopwords(words):
-    return [word for word in words if word not in nltk_stopwords]
+    return [w for w in words if w not in allstopwords]
+
+
+def countOtherWords(words, i):
+    otherWordFreq = []
+    otherWords = []
+    temp = {}
+    count = 0
+    for word in words:
+        if word not in otherWords and word not in allpositivewords and word not in allnegativewords:
+            otherWords.append(word)
+            freq = words.count(word)
+            otherWordFreq.append(freq)
+            count += freq
+    temp['wordList'] = otherWords
+    temp['wordFreq'] = otherWordFreq
+    otherword_freq[i] = copy.deepcopy(temp)
+    otherword_totalfreq.append(count)
 
 
 def countPositiveWords(words, i, txt):
@@ -278,23 +295,42 @@ def plotPositiveWordsAgainstNegativeWords():
     fig.show()
 
 
+def calculateSentimentScore(i):
+    p = posword_totalfreq[i]
+    n = negword_totalfreq[i]
+    u = otherword_totalfreq[i]
+    # Approach 1: Absolute
+    # score = (p-n)/(p+n+u)
+
+    # Approach 2: Relative
+    score = (p-n)/(p+n)
+    return round(score, 2)
+
+
 for i in range(len(urls)):
     txt, wordlist, wordfreq = extract_text(urls[i])
     countStopWord(wordlist, i, txt)
 
-    # print(
-    #     str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
-    # print()
+    print(
+        str(list(zip(stopWordList[i]['wordList'], stopWordList[i]['wordFreq']))))
+    print()
     # print()
     # countStopWordList(wordlist, i, txt)
     # print(
     #     str(list(zip(stopWordListx[i]['wordList'], stopWordListx[i]['wordFreq']))))
-    # print('--------------------------------------------------------------------------------------------------------------------')
+    print('--------------------------------------------------------------------------------------------------------------------')
 
     wordlist = removeStopwords(wordlist)
+    countOtherWords(wordlist, i)
     countPositiveWords(wordlist, i, txt)
     countNegativeWords(wordlist, i, txt)
+    print(calculateSentimentScore(i))
 
+    try:
+        with open('assets/otherwords-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
+            json.dump(otherword_freq[i], outfile, ensure_ascii=False)
+    except Exception as e:
+        print(e)
     try:
         with open('assets/news-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
             outfile.write(txt)
@@ -311,24 +347,30 @@ for i in range(len(urls)):
     except Exception as e:
         print(e)
     try:
-        with open('assets/positiveWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
-            json.dump(posword_totalfreq, outfile, ensure_ascii=False)
-    except Exception as e:
-        print(e)
-    try:
         with open('assets/negativeWordFreq-{}.txt'.format(transport[i]), 'w', encoding='utf-8')as outfile:
             json.dump(negword_freq[i], outfile, ensure_ascii=False)
     except Exception as e:
         print(e)
-    try:
-        with open('assets/negativeWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
-            json.dump(negword_totalfreq, outfile, ensure_ascii=False)
-    except Exception as e:
-        print(e)
-
 
 # outside for loop
+try:
+    with open('assets/otherWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
+        json.dump(otherword_totalfreq, outfile, ensure_ascii=False)
+except Exception as e:
+    print(e)
+try:
+    with open('assets/positiveWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
+        json.dump(posword_totalfreq, outfile, ensure_ascii=False)
+except Exception as e:
+    print(e)
+try:
+    with open('assets/negativeWordTotalFreq.txt', 'w', encoding='utf-8')as outfile:
+        json.dump(negword_totalfreq, outfile, ensure_ascii=False)
+except Exception as e:
+    print(e)
+
+
 plotStopwords()
-plotPositiveWords()
-plotNegativeWords()
+# plotPositiveWords()
+# plotNegativeWords()
 plotPositiveWordsAgainstNegativeWords()
